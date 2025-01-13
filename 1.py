@@ -64,65 +64,79 @@ def main():
     score = 0  # Начальный счет
 
     running = True
+    game_over = False  # Флаг для окончания игры
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:  # Движение влево
-            player.move(-player.speed)
-        if keys[pygame.K_d]:  # Движение вправо
-            player.move(player.speed)
+        if not game_over:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_a]:  # Движение влево
+                player.move(-player.speed)
+            if keys[pygame.K_d]:  # Движение вправо
+                player.move(player.speed)
 
-        # Добавляем новый объект только если их меньше максимального количества
-        if len(falling_objects) < max_objects and random.randint(1, 30) == 1:
-            obj_type = random.randint(0, 2)  # 0 - большой, 1 - средний, 2 - маленький
-            falling_objects.append(FallingObject(obj_type))
+            # Добавляем новый объект только если их меньше максимального количества
+            if len(falling_objects) < max_objects and random.randint(1, 30) == 1:
+                obj_type = random.randint(
+                    0, 2
+                )  # 0 - большой, 1 - средний, 2 - маленький
+                falling_objects.append(FallingObject(obj_type))
 
-        # Обновляем позиции объектов и проверяем на столкновение с игроком
-        for obj in falling_objects:
-            obj.fall()
+            # Обновляем позиции объектов и проверяем на столкновение с игроком
+            for obj in falling_objects:
+                obj.fall()
 
-            # Проверяем на столкновение
-            if player.get_rect().colliderect(
-                pygame.Rect(obj.x, obj.y, obj.size, obj.size)
-            ):
-                if obj.obj_type == 0:  # Большой объект
-                    score -= 2
-                elif obj.obj_type == 1:  # Средний объект
-                    score += 2
-                elif obj.obj_type == 2:  # Маленький объект
-                    score += 1
+                # Проверяем на столкновение
+                if player.get_rect().colliderect(
+                    pygame.Rect(obj.x, obj.y, obj.size, obj.size)
+                ):
+                    if obj.obj_type == 0:  # Большой объект
+                        score -= 1
+                    elif obj.obj_type == 1:  # Средний объект
+                        score += 2
+                    elif obj.obj_type == 2:  # Маленький объект
+                        score += 1
 
-                # Удаляем объект после столкновения
-                falling_objects.remove(obj)
+                    # Удаляем объект после столкновения
+                    falling_objects.remove(obj)
 
-        # Удаляем объекты, которые вышли за границы экрана
-        falling_objects = [obj for obj in falling_objects if obj.y < HEIGHT]
+            # Проверяем, не достиг ли счет отрицательных значений
+            if score < 0:
+                game_over = True  # Устанавливаем флаг окончания игры
 
-        # Очистка экрана
+            # Удаляем объекты, которые вышли за границы экрана
+            falling_objects = [obj for obj in falling_objects if obj.y < HEIGHT]
 
-        window.fill((255, 255, 255))  # Устанавливаем белый фон
+            # Очистка экрана
+            window.fill((255, 255, 255))  # Устанавливаем белый фон
 
-        # Рисуем все падающие объекты
-        for obj in falling_objects:
-            obj.draw(window)
+            # Рисуем все падающие объекты
+            for obj in falling_objects:
+                obj.draw(window)
 
-        # Рисуем управляемый объект
-        player.draw(window)
+            # Рисуем управляемый объект
+            player.draw(window)
 
-        # Отображаем счет
-        font = pygame.font.Font(None, 36)
-        score_text = font.render(f"Счет: {score}", True, (0, 0, 0))
-        window.blit(score_text, (10, 10))  # Размещение счёта в верхнем левом углу
+            # Отображаем счет
+            font = pygame.font.Font(None, 36)
+            score_text = font.render(f"Счет: {score}", True, (0, 0, 0))
+            window.blit(score_text, (10, 10))  # Размещение счёта в верхнем левом углу
+
+        else:
+            # Отображение текста "Game Over!"
+            font = pygame.font.Font(None, 74)
+            game_over_text = font.render("Game Over!", True, (255, 0, 0))
+            text_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            window.blit(game_over_text, text_rect)
 
         # Обновляем экран
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
-
 
 if __name__ == "__main__":
     main()
