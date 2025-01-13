@@ -17,12 +17,14 @@ max_objects = 5  # Максимальное количество падающи�
 # Класс для падающих объектов
 class FallingObject:
     def __init__(self, obj_type):
-        sizes = [80, 50, 30]  # Большой, Средний, Маленький
+        sizes = [80, 50, 30]  # Размеры объектов: Большой, Средний, Маленький
         self.size = sizes[obj_type]
         self.color = colors[obj_type]
         self.x = random.randint(0, WIDTH - self.size)
         self.y = -self.size
-        self.speed = [2, 1.5, 1][obj_type]  # Скорость падения
+
+        # Увеличиваем скорость падения объектов
+        self.speed = [3, 2.5, 2][obj_type]  # Скорость падения: увеличена
         self.obj_type = obj_type  # Сохраняем тип объекта
 
     def fall(self):
@@ -64,7 +66,7 @@ def main():
     score = 0  # Начальный счет
 
     running = True
-    game_over = False  # Флаг для окончания игры
+    game_over = False  # Флаг, указывающий, окончена ли игра
 
     while running:
         for event in pygame.event.get():
@@ -101,6 +103,7 @@ def main():
                         score += 1
 
                     # Удаляем объект после столкновения
+
                     falling_objects.remove(obj)
 
             # Проверяем, не достиг ли счет отрицательных значений
@@ -123,14 +126,26 @@ def main():
             # Отображаем счет
             font = pygame.font.Font(None, 36)
             score_text = font.render(f"Счет: {score}", True, (0, 0, 0))
-            window.blit(score_text, (10, 10))  # Размещение счёта в верхнем левом углу
+            window.blit(score_text, (10, 10))  # Размещение счета в верхнем левом углу
 
         else:
-            # Отображение текста "Game Over!"
-            font = pygame.font.Font(None, 74)
+            # Отображение текста "Game Over!" с меньшим размером шрифта
+            font = pygame.font.Font(None, 48)  # Уменьшен размер шрифта
             game_over_text = font.render("Game Over!", True, (255, 0, 0))
-            text_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            text_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 3))
             window.blit(game_over_text, text_rect)
+
+            # Отображение текста "Нажмите пробел чтобы начать заново" с меньшим размером шрифта
+            restart_text = font.render(
+                "Нажмите SPACE чтобы начать заново", True, (0, 0, 0)
+            )
+            restart_rect = restart_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            window.blit(restart_text, restart_rect)
+
+            # Проверяем нажатие пробела для перезапуска игры
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                main()  # Запуск новой игры
 
         # Обновляем экран
         pygame.display.flip()
